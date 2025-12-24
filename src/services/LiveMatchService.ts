@@ -85,7 +85,12 @@ export const LiveMatchService = {
             lastEvent: {
                 type: '6',
                 description: 'Suryakumar Yadav hits a massive six over fine leg!'
-            }
+            },
+            timeline: [
+                { over: 17, ball: 6, runs: 1, type: 'Other' },
+                { over: 18, ball: 1, runs: 4, type: '4' },
+                { over: 18, ball: 2, runs: 6, type: '6' }
+            ]
         };
     }
 };

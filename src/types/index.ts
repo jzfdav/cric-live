@@ -21,6 +21,12 @@ export interface CricMatch {
         type: '4' | '6' | 'W' | 'Dot' | 'Other';
         description: string;
     };
+    timeline: Array<{
+        over: number;
+        ball: number;
+        runs: number;
+        type: '4' | '6' | 'W' | 'Dot' | 'Other';
+    }>;
     mindset: '🛡️ Rebuilding' | '🔥 Accelerating' | '⚖️ Balanced' | '🏁 Finishing';
     lastUpdated: number;
 }

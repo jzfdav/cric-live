@@ -1,5 +1,6 @@
 import { useEffect } from 'preact/hooks';
 import { Scoreboard } from './components/Scoreboard';
+import { TimelineTicker } from './components/TimelineTicker';
 import { EffectsOverlay } from './components/EffectsOverlay';
 import { LiveMatchService } from './services/LiveMatchService';
 import { networkStatus } from './state/MatchStore';
@@ -27,7 +28,7 @@ export function App() {
 
       <main>
         <Scoreboard />
-        {/* Future components like TimelineTicker will go here */}
+        <TimelineTicker />
       </main>
 
       <EffectsOverlay />
