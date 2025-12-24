@@ -21,4 +21,14 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+# Environment variables
+.env
+.env.production
+
+# AI Specific
+ai/
+brain/
+implementation_plan.md
+walkthrough.md
+task.md
+
