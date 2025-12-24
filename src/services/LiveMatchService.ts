@@ -1,4 +1,4 @@
-import { matchData, networkStatus, eventTrigger } from '../state/MatchStore';
+import { matchData, networkStatus, eventTrigger, matchList } from '../state/MatchStore';
 import type { CricMatch } from '../types';
 
 let pollingInterval: number | null = null;
@@ -26,18 +26,23 @@ export const LiveMatchService = {
     async fetchSnapshot(matchId: string) {
         networkStatus.value = 'loading';
         try {
-            // TODO: Replace with actual API call once keys are ready
-            // For now, using mock data for Phase 1 POC
+            // Mocking different matches based on ID
             const mockData = this.getMockData(matchId);
-
-            // Apply transformation/mapping here
             this.updateStore(mockData);
-
             networkStatus.value = 'online';
         } catch (error) {
             console.error("Polling failed:", error);
             networkStatus.value = 'error';
         }
+    },
+
+    async fetchMatchList() {
+        // Mock match list
+        matchList.value = [
+            { id: 'ind-vs-pak-2025', title: 'IND vs PAK', status: 'Live' },
+            { id: 'aus-vs-eng-2025', title: 'AUS vs ENG', status: 'Live' },
+            { id: 'sa-vs-nz-2025', title: 'SA vs NZ', status: 'Upcoming' }
+        ];
     },
 
     updateStore(newData: CricMatch) {
@@ -55,42 +60,45 @@ export const LiveMatchService = {
     },
 
     getMockData(matchId: string): CricMatch {
+        const isIndPak = matchId.includes('ind-vs-pak');
+        const isAusEng = matchId.includes('aus-vs-eng');
+
         return {
             id: matchId,
-            status: 'Live',
-            venue: 'Eden Gardens, Kolkata',
-            description: 'India vs Pakistan - T20 World Cup',
+            status: isIndPak || isAusEng ? 'Live' : 'Upcoming',
+            venue: isIndPak ? 'Eden Gardens, Kolkata' : (isAusEng ? 'MCG, Melbourne' : 'Kingsmead, Durban'),
+            description: isIndPak ? 'India vs Pakistan - T20 World Cup' : (isAusEng ? 'The Ashes - Test 1' : 'SA vs NZ - ODI Series'),
             teams: {
                 home: {
-                    name: 'India',
-                    shortName: 'IND',
-                    score: 182,
-                    wickets: 4,
-                    overs: 18.2,
+                    name: isIndPak ? 'India' : (isAusEng ? 'Australia' : 'South Africa'),
+                    shortName: isIndPak ? 'IND' : (isAusEng ? 'AUS' : 'SA'),
+                    score: isIndPak ? 182 : (isAusEng ? 342 : 0),
+                    wickets: isIndPak ? 4 : (isAusEng ? 8 : 0),
+                    overs: isIndPak ? 18.2 : (isAusEng ? 90.0 : 0),
                     isBatting: true,
-                    color: '#004184'
+                    color: isIndPak ? '#004184' : (isAusEng ? '#FFD700' : '#006A4E')
                 },
                 away: {
-                    name: 'Pakistan',
-                    shortName: 'PAK',
+                    name: isIndPak ? 'Pakistan' : (isAusEng ? 'England' : 'New Zealand'),
+                    shortName: isIndPak ? 'PAK' : (isAusEng ? 'ENG' : 'NZ'),
                     score: 0,
                     wickets: 0,
                     overs: 0,
                     isBatting: false,
-                    color: '#006629'
+                    color: isIndPak ? '#006629' : (isAusEng ? '#00148E' : '#000000')
                 }
             },
-            mindset: '🔥 Accelerating',
+            mindset: isIndPak ? '🔥 Accelerating' : '⚖️ Balanced',
             lastUpdated: Date.now(),
             lastEvent: {
                 type: '6',
-                description: 'Suryakumar Yadav hits a massive six over fine leg!'
+                description: 'Match Snapshot Loaded'
             },
-            timeline: [
+            timeline: isIndPak ? [
                 { over: 17, ball: 6, runs: 1, type: 'Other' },
                 { over: 18, ball: 1, runs: 4, type: '4' },
                 { over: 18, ball: 2, runs: 6, type: '6' }
-            ]
+            ] : []
         };
     }
 };

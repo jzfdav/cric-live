@@ -3,6 +3,8 @@ import type { CricMatch, NetworkStatus } from '../types';
 
 // Global state for Cric-Live
 export const matchData = signal<CricMatch | null>(null);
+export const matchList = signal<Array<{ id: string; title: string; status: string }>>([]);
+export const selectedMatchId = signal<string | null>(null);
 export const networkStatus = signal<NetworkStatus>('online');
 export const eventTrigger = signal<{ type: string; timestamp: number } | null>(null);
 

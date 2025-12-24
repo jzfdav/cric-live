@@ -1,15 +1,21 @@
 import { useEffect } from 'preact/hooks';
 import { Scoreboard } from './components/Scoreboard';
 import { TimelineTicker } from './components/TimelineTicker';
+import { MatchSelector } from './components/MatchSelector';
 import { EffectsOverlay } from './components/EffectsOverlay';
 import { LiveMatchService } from './services/LiveMatchService';
-import { networkStatus } from './state/MatchStore';
+import { networkStatus, selectedMatchId } from './state/MatchStore';
 import './app.css';
 
 export function App() {
   useEffect(() => {
-    // Start polling with a demo match ID
-    LiveMatchService.startPolling('ind-vs-pak-2025');
+    // Initialize Match List
+    LiveMatchService.fetchMatchList();
+
+    // Start polling with a default match
+    const defaultId = 'ind-vs-pak-2025';
+    selectedMatchId.value = defaultId;
+    LiveMatchService.startPolling(defaultId);
 
     return () => LiveMatchService.stopPolling();
   }, []);
@@ -27,6 +33,7 @@ export function App() {
       </header>
 
       <main>
+        <MatchSelector />
         <Scoreboard />
         <TimelineTicker />
       </main>

@@ -1,0 +1,61 @@
+.match-selector-container {
+    margin-bottom: 1.5rem;
+}
+
+.selector-scroll {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+}
+
+.selector-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.match-pill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.match-pill:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.match-pill.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #FFB300;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.match-pill-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.status-pill {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-pill.live {
+    background: #10B981;
+    box-shadow: 0 0 6px #10B981;
+}
+
+.status-pill.upcoming {
+    background: rgba(255, 255, 255, 0.3);
+}
