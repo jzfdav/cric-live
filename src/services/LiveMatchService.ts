@@ -1,5 +1,7 @@
 import { matchData, networkStatus, eventTrigger, matchList } from '../state/MatchStore';
 import type { CricMatch } from '../types';
+import { fetchFromAPI } from './apiClient';
+import { mapCricketDataToInternal } from './apiMapper';
 
 let pollingInterval: number | null = null;
 const DEFAULT_INTERVAL = 45000; // 45 seconds
@@ -26,9 +28,15 @@ export const LiveMatchService = {
     async fetchSnapshot(matchId: string) {
         networkStatus.value = 'loading';
         try {
-            // Mocking different matches based on ID
-            const mockData = this.getMockData(matchId);
-            this.updateStore(mockData);
+            // Check if we are in mock mode
+            if (import.meta.env.VITE_CRICKET_API_KEY === 'MOCK_KEY') {
+                const mockData = this.getMockData(matchId);
+                this.updateStore(mockData);
+            } else {
+                const rawData = await fetchFromAPI<{ data: any }>(`/match_info?id=${matchId}`);
+                const mappedData = mapCricketDataToInternal(rawData.data);
+                this.updateStore(mappedData);
+            }
             networkStatus.value = 'online';
         } catch (error) {
             console.error("Polling failed:", error);
