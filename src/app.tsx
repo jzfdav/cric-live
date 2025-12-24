@@ -1,43 +1,40 @@
-import { useState } from 'preact/hooks'
-import preactLogo from './assets/preact.svg'
-import viteLogo from '/vite.svg'
-import './app.css'
+import { useEffect } from 'preact/hooks';
+import { Scoreboard } from './components/Scoreboard';
+import { EffectsOverlay } from './components/EffectsOverlay';
+import { LiveMatchService } from './services/LiveMatchService';
+import { networkStatus } from './state/MatchStore';
+import './app.css';
 
 export function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    // Start polling with a demo match ID
+    LiveMatchService.startPolling('ind-vs-pak-2025');
+
+    return () => LiveMatchService.stopPolling();
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://preactjs.com" target="_blank">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
-        </a>
-      </div>
-      <h1>Vite + Preact</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p>
-        Check out{' '}
-        <a
-          href="https://preactjs.com/guide/v10/getting-started#create-a-vite-powered-preact-app"
-          target="_blank"
-        >
-          create-preact
-        </a>
-        , the official Preact + Vite starter
-      </p>
-      <p class="read-the-docs">
-        Click on the Vite and Preact logos to learn more
-      </p>
-    </>
-  )
+    <div id="app-root">
+      <header className="app-header">
+        <h1 className="app-title">
+          CRIC<span className="text-accent-amber">LIVE</span>
+        </h1>
+        <div className="network-indicator">
+          <span className={`status-dot ${networkStatus.value}`}></span>
+          <span className="status-text">{networkStatus.value.toUpperCase()}</span>
+        </div>
+      </header>
+
+      <main>
+        <Scoreboard />
+        {/* Future components like TimelineTicker will go here */}
+      </main>
+
+      <EffectsOverlay />
+
+      <footer className="app-footer">
+        <p>&copy; 2025 Cric-Live Companion</p>
+      </footer>
+    </div>
+  );
 }
