@@ -88,6 +88,7 @@ export const LiveMatchService = {
                     color: isIndPak ? '#006629' : (isAusEng ? '#00148E' : '#000000')
                 }
             },
+            target: isIndPak ? 198 : undefined,
             mindset: isIndPak ? '🔥 Accelerating' : '⚖️ Balanced',
             lastUpdated: Date.now(),
             lastEvent: {

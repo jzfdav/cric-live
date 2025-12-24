@@ -2,6 +2,7 @@ import { useEffect } from 'preact/hooks';
 import { Scoreboard } from './components/Scoreboard';
 import { TimelineTicker } from './components/TimelineTicker';
 import { MatchSelector } from './components/MatchSelector';
+import { LiveChaseSummary } from './components/LiveChaseSummary';
 import { EffectsOverlay } from './components/EffectsOverlay';
 import { LiveMatchService } from './services/LiveMatchService';
 import { networkStatus, selectedMatchId } from './state/MatchStore';
@@ -35,6 +36,7 @@ export function App() {
       <main>
         <MatchSelector />
         <Scoreboard />
+        <LiveChaseSummary />
         <TimelineTicker />
       </main>
 

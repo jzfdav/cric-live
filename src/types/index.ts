@@ -17,6 +17,7 @@ export interface CricMatch {
         home: Team;
         away: Team;
     };
+    target?: number;
     lastEvent?: {
         type: '4' | '6' | 'W' | 'Dot' | 'Other';
         description: string;
