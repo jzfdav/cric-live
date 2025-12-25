@@ -6,7 +6,7 @@ import { LiveChaseSummary } from './components/LiveChaseSummary';
 import { DebugStatus } from './components/DebugStatus';
 import { EffectsOverlay } from './components/EffectsOverlay';
 import { LiveMatchService } from './services/LiveMatchService';
-import { networkStatus, selectedMatchId } from './state/MatchStore';
+import { networkStatus } from './state/MatchStore';
 import './app.css';
 
 export function App() {
@@ -14,10 +14,11 @@ export function App() {
     // Initialize Match List
     LiveMatchService.fetchMatchList();
 
-    // Start polling with a default match
-    const defaultId = 'ind-vs-pak-2025';
-    selectedMatchId.value = defaultId;
-    LiveMatchService.startPolling(defaultId);
+    // Initialize Match List
+    LiveMatchService.fetchMatchList().then(() => {
+      // If no match is selected, we could automatically pick the first one
+      // But for now, we wait for the user to select from the MatchSelector
+    });
 
     return () => LiveMatchService.stopPolling();
   }, []);
