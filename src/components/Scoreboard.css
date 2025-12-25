@@ -10,10 +10,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.5);
+}
+
+.match-venue {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
 }
 
 .match-status-badge {
@@ -64,6 +75,8 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 0;
+    flex: 1;
 }
 
 .team-color-strip {
@@ -75,6 +88,9 @@
 .team-name {
     font-weight: 600;
     font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .team-short-name {
@@ -128,7 +144,22 @@
 }
 
 @media (max-width: 640px) {
+    .scoreboard-container {
+        padding: 1rem;
+    }
+
     .team-name {
-        display: none;
+        font-size: 0.95rem;
+        display: block;
+    }
+
+    .team-score {
+        font-size: 1.1rem;
+    }
+
+    .match-venue {
+        text-align: left;
+        width: 100%;
+        order: 2;
     }
 }
