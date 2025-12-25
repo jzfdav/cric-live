@@ -1,13 +1,14 @@
-import { matchData } from '../state/MatchStore';
+import { matchData, apiStatus } from '../state/MatchStore';
 import './Scoreboard.css';
 
 export function Scoreboard() {
     const match = matchData.value;
+    const { keyMissing } = apiStatus.value;
 
     if (!match) {
         return (
             <div className="scoreboard-placeholder glass-card animate-pulse">
-                Waiting for match data...
+                {keyMissing ? 'API Key Missing - Check configuration above' : 'Waiting for match data...'}
             </div>
         );
     }

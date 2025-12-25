@@ -1,4 +1,4 @@
-import { matchData, networkStatus, eventTrigger, matchList } from '../state/MatchStore';
+import { matchData, networkStatus, eventTrigger, matchList, apiStatus } from '../state/MatchStore';
 import type { CricMatch } from '../types';
 import { fetchFromAPI } from './apiClient';
 import { mapCricketDataToInternal } from './apiMapper';
@@ -28,12 +28,18 @@ export const LiveMatchService = {
     async fetchSnapshot(matchId: string) {
         networkStatus.value = 'loading';
         const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
+        const isMockKey = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
+
+        apiStatus.value = {
+            keyMissing: isMockKey,
+            provider: import.meta.env.VITE_API_PROVIDER || 'cricketdata'
+        };
 
         try {
-            // Check if we are in mock mode (Key is 'MOCK_KEY', missing, or undefined)
-            if (!apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined') {
-                const mockData = this.getMockData(matchId);
-                this.updateStore(mockData);
+            if (isMockKey) {
+                // If personal use and key is missing, we don't show mock data anymore
+                // instead we leave matchData as null so the UI can show the error
+                matchData.value = null;
             } else {
                 const rawData = await fetchFromAPI<{ data: any }>(`/match_info?id=${matchId}`);
                 const mappedData = mapCricketDataToInternal(rawData.data);
@@ -47,12 +53,19 @@ export const LiveMatchService = {
     },
 
     async fetchMatchList() {
-        // Mock match list
-        matchList.value = [
-            { id: 'ind-vs-pak-2025', title: 'IND vs PAK', status: 'Live' },
-            { id: 'aus-vs-eng-2025', title: 'AUS vs ENG', status: 'Live' },
-            { id: 'sa-vs-nz-2025', title: 'SA vs NZ', status: 'Upcoming' }
-        ];
+        const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
+        const isMockKey = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
+
+        if (isMockKey) {
+            matchList.value = [];
+        } else {
+            // Mock match list for testing real API flow
+            matchList.value = [
+                { id: 'ind-vs-pak-2025', title: 'IND vs PAK', status: 'Live' },
+                { id: 'aus-vs-eng-2025', title: 'AUS vs ENG', status: 'Live' },
+                { id: 'sa-vs-nz-2025', title: 'SA vs NZ', status: 'Upcoming' }
+            ];
+        }
     },
 
     updateStore(newData: CricMatch) {

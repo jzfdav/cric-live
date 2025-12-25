@@ -7,6 +7,7 @@ export const matchList = signal<Array<{ id: string; title: string; status: strin
 export const selectedMatchId = signal<string | null>(null);
 export const networkStatus = signal<NetworkStatus>('online');
 export const eventTrigger = signal<{ type: string; timestamp: number } | null>(null);
+export const apiStatus = signal<{ keyMissing: boolean; provider: string }>({ keyMissing: false, provider: 'cricketdata' });
 
 // Computed signals
 export const currentScore = computed(() => {
