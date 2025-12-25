@@ -27,9 +27,11 @@ export const LiveMatchService = {
 
     async fetchSnapshot(matchId: string) {
         networkStatus.value = 'loading';
+        const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
+
         try {
-            // Check if we are in mock mode
-            if (import.meta.env.VITE_CRICKET_API_KEY === 'MOCK_KEY') {
+            // Check if we are in mock mode (Key is 'MOCK_KEY', missing, or undefined)
+            if (!apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined') {
                 const mockData = this.getMockData(matchId);
                 this.updateStore(mockData);
             } else {
