@@ -28,17 +28,15 @@ export const LiveMatchService = {
     async fetchSnapshot(matchId: string) {
         networkStatus.value = 'loading';
         const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
-        const isMockKey = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
+        const isKeyMissing = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
 
         apiStatus.value = {
-            keyMissing: isMockKey,
+            keyMissing: isKeyMissing,
             provider: import.meta.env.VITE_API_PROVIDER || 'cricketdata'
         };
 
         try {
-            if (isMockKey) {
-                // If personal use and key is missing, we don't show mock data anymore
-                // instead we leave matchData as null so the UI can show the error
+            if (isKeyMissing) {
                 matchData.value = null;
             } else {
                 const rawData = await fetchFromAPI<{ data: any }>(`/match_info?id=${matchId}`);
@@ -54,17 +52,22 @@ export const LiveMatchService = {
 
     async fetchMatchList() {
         const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
-        const isMockKey = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
+        const isKeyMissing = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
 
-        if (isMockKey) {
+        if (isKeyMissing) {
             matchList.value = [];
         } else {
-            // Mock match list for testing real API flow
-            matchList.value = [
-                { id: 'ind-vs-pak-2025', title: 'IND vs PAK', status: 'Live' },
-                { id: 'aus-vs-eng-2025', title: 'AUS vs ENG', status: 'Live' },
-                { id: 'sa-vs-nz-2025', title: 'SA vs NZ', status: 'Upcoming' }
-            ];
+            try {
+                // Fetch actual live matches from the API
+                const response = await fetchFromAPI<{ data: any[] }>('/currentMatches');
+                matchList.value = (response.data || []).map(m => ({
+                    id: m.id,
+                    title: m.name,
+                    status: m.matchStarted ? 'Live' : 'Upcoming'
+                }));
+            } catch (error) {
+                console.error("Failed to fetch match list:", error);
+            }
         }
     },
 
@@ -80,49 +83,5 @@ export const LiveMatchService = {
         }
 
         matchData.value = newData;
-    },
-
-    getMockData(matchId: string): CricMatch {
-        const isIndPak = matchId.includes('ind-vs-pak');
-        const isAusEng = matchId.includes('aus-vs-eng');
-
-        return {
-            id: matchId,
-            status: isIndPak || isAusEng ? 'Live' : 'Upcoming',
-            venue: isIndPak ? 'Eden Gardens, Kolkata' : (isAusEng ? 'MCG, Melbourne' : 'Kingsmead, Durban'),
-            description: isIndPak ? 'India vs Pakistan - T20 World Cup' : (isAusEng ? 'The Ashes - Test 1' : 'SA vs NZ - ODI Series'),
-            teams: {
-                home: {
-                    name: isIndPak ? 'India' : (isAusEng ? 'Australia' : 'South Africa'),
-                    shortName: isIndPak ? 'IND' : (isAusEng ? 'AUS' : 'SA'),
-                    score: isIndPak ? 182 : (isAusEng ? 342 : 0),
-                    wickets: isIndPak ? 4 : (isAusEng ? 8 : 0),
-                    overs: isIndPak ? 18.2 : (isAusEng ? 90.0 : 0),
-                    isBatting: true,
-                    color: isIndPak ? '#004184' : (isAusEng ? '#FFD700' : '#006A4E')
-                },
-                away: {
-                    name: isIndPak ? 'Pakistan' : (isAusEng ? 'England' : 'New Zealand'),
-                    shortName: isIndPak ? 'PAK' : (isAusEng ? 'ENG' : 'NZ'),
-                    score: 0,
-                    wickets: 0,
-                    overs: 0,
-                    isBatting: false,
-                    color: isIndPak ? '#006629' : (isAusEng ? '#00148E' : '#000000')
-                }
-            },
-            target: isIndPak ? 198 : undefined,
-            mindset: isIndPak ? '🔥 Accelerating' : '⚖️ Balanced',
-            lastUpdated: Date.now(),
-            lastEvent: {
-                type: '6',
-                description: 'Match Snapshot Loaded'
-            },
-            timeline: isIndPak ? [
-                { over: 17, ball: 6, runs: 1, type: 'Other' },
-                { over: 18, ball: 1, runs: 4, type: '4' },
-                { over: 18, ball: 2, runs: 6, type: '6' }
-            ] : []
-        };
     }
 };
