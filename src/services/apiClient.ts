@@ -4,7 +4,7 @@
  */
 export async function fetchFromAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
-    const baseUrl = 'https://api.cricketdata.org/v1'; // Example for CricketData.org
+    const baseUrl = 'https://api.cricapi.com/v1'; // Using cricapi.com domain as cricketdata.org resets connections
 
     try {
         const url = `${baseUrl}${endpoint}${endpoint.includes('?') ? '&' : '?'}apikey=${apiKey}`;
