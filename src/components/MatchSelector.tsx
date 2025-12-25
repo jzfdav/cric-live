@@ -1,15 +1,22 @@
-import { sortedMatchList, selectedMatchId, favoriteTeams } from '../state/MatchStore';
+import { useQuery } from '@tanstack/react-query';
+import { sortedMatchList, selectedMatchId, favoriteTeams, refreshInterval } from '../state/MatchStore';
 import { LiveMatchService } from '../services/LiveMatchService';
+import { RefreshControl } from './RefreshControl';
 import './MatchSelector.css';
 
 export function MatchSelector() {
+    const { isLoading } = useQuery({
+        queryKey: ['matchList'],
+        queryFn: () => LiveMatchService.fetchMatchList(),
+        refetchInterval: refreshInterval.value * 5, // Refresh list less frequently than individual matches
+    });
+
     const matches = sortedMatchList.value;
     const currentId = selectedMatchId.value;
     const favs = favoriteTeams.value;
 
     const handleSelect = (id: string) => {
         selectedMatchId.value = id;
-        LiveMatchService.startPolling(id);
     };
 
     const toggleFavorite = (e: MouseEvent, teamName: string) => {
@@ -27,13 +34,19 @@ export function MatchSelector() {
         localStorage.setItem('cric-live-favorites', JSON.stringify(currentFavs));
     };
 
-    if (matches.length === 0) return null;
+    if (isLoading && matches.length === 0) {
+        return <div className="match-selector-loading">Loading matches...</div>;
+    }
 
     return (
         <div className="match-selector-container">
+            <div className="selector-header">
+                <h2 className="selector-title">Select Match</h2>
+                <RefreshControl />
+            </div>
+
             <div className="match-grid">
                 {matches.map((match) => {
-                    // Try to parse teams from title (e.g., "India vs Pakistan")
                     const teams = match.title.split(' vs ');
                     const isAnyFav = teams.some(t => favs.includes(t.trim()));
 

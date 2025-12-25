@@ -1,14 +1,34 @@
-import { matchData, apiStatus } from '../state/MatchStore';
+import { useQuery } from '@tanstack/react-query';
+import { matchData, apiStatus, selectedMatchId, refreshInterval } from '../state/MatchStore';
+import { LiveMatchService } from '../services/LiveMatchService';
 import './Scoreboard.css';
 
 export function Scoreboard() {
-    const match = matchData.value;
+    const matchId = selectedMatchId.value;
     const { keyMissing } = apiStatus.value;
+
+    useQuery({
+        queryKey: ['matchSnapshot', matchId],
+        queryFn: () => matchId ? LiveMatchService.fetchSnapshot(matchId) : Promise.resolve(null),
+        enabled: !!matchId,
+        refetchInterval: refreshInterval.value,
+        refetchOnWindowFocus: true, // Auto-refetch when user returns to tab
+    });
+
+    const match = matchData.value;
+
+    if (!matchId) {
+        return (
+            <div className="scoreboard-placeholder glass-card">
+                Select a match from the list below to track live scores.
+            </div>
+        );
+    }
 
     if (!match) {
         return (
             <div className="scoreboard-placeholder glass-card animate-pulse">
-                {keyMissing ? 'API Key Missing - Check configuration above' : 'Waiting for match data...'}
+                {keyMissing ? 'API Key Missing - Check configuration above' : 'Loading live match data...'}
             </div>
         );
     }

@@ -3,29 +3,8 @@ import type { CricMatch } from '../types';
 import { fetchFromAPI } from './apiClient';
 import { mapCricketDataToInternal } from './apiMapper';
 
-let pollingInterval: number | null = null;
-const DEFAULT_INTERVAL = 45000; // 45 seconds
-
 export const LiveMatchService = {
-    startPolling(matchId: string, interval = DEFAULT_INTERVAL) {
-        if (pollingInterval) this.stopPolling();
-
-        console.log(`Starting polling for match: ${matchId}`);
-        this.fetchSnapshot(matchId); // Initial fetch
-
-        pollingInterval = window.setInterval(() => {
-            this.fetchSnapshot(matchId);
-        }, interval);
-    },
-
-    stopPolling() {
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-        }
-    },
-
-    async fetchSnapshot(matchId: string) {
+    async fetchSnapshot(matchId: string): Promise<CricMatch | null> {
         networkStatus.value = 'loading';
         const apiKey = import.meta.env.VITE_CRICKET_API_KEY;
         const isKeyMissing = !apiKey || apiKey === 'MOCK_KEY' || apiKey === 'undefined';
@@ -35,18 +14,22 @@ export const LiveMatchService = {
             provider: import.meta.env.VITE_API_PROVIDER || 'cricketdata'
         };
 
-        try {
-            if (isKeyMissing) {
-                matchData.value = null;
-            } else {
-                const rawData = await fetchFromAPI<{ data: any }>(`/match_info?id=${matchId}`);
-                const mappedData = mapCricketDataToInternal(rawData.data);
-                this.updateStore(mappedData);
-            }
+        if (isKeyMissing) {
+            matchData.value = null;
             networkStatus.value = 'online';
+            return null;
+        }
+
+        try {
+            const rawData = await fetchFromAPI<{ data: any }>(`/match_info?id=${matchId}`);
+            const mappedData = mapCricketDataToInternal(rawData.data);
+            this.updateStore(mappedData);
+            networkStatus.value = 'online';
+            return mappedData;
         } catch (error) {
-            console.error("Polling failed:", error);
+            console.error("Fetch snapshot failed:", error);
             networkStatus.value = 'error';
+            throw error;
         }
     },
 
@@ -56,23 +39,25 @@ export const LiveMatchService = {
 
         if (isKeyMissing) {
             matchList.value = [];
-        } else {
-            try {
-                // Fetch actual live matches from the API
-                const response = await fetchFromAPI<{ data: any[] }>('/currentMatches');
-                matchList.value = (response.data || []).map(m => ({
-                    id: m.id,
-                    title: m.name,
-                    status: m.matchStarted ? 'Live' : 'Upcoming'
-                }));
-            } catch (error) {
-                console.error("Failed to fetch match list:", error);
-            }
+            return [];
+        }
+
+        try {
+            const response = await fetchFromAPI<{ data: any[] }>('/currentMatches');
+            const list = (response.data || []).map(m => ({
+                id: m.id,
+                title: m.name,
+                status: m.matchStarted ? 'Live' : 'Upcoming'
+            }));
+            matchList.value = list;
+            return list;
+        } catch (error) {
+            console.error("Failed to fetch match list:", error);
+            throw error;
         }
     },
 
     updateStore(newData: CricMatch) {
-        // Guardrail: Detect major events to trigger visual effects
         if (newData.lastEvent && newData.lastEvent !== matchData.value?.lastEvent) {
             if (['4', '6', 'W'].includes(newData.lastEvent.type)) {
                 eventTrigger.value = {
@@ -81,7 +66,6 @@ export const LiveMatchService = {
                 };
             }
         }
-
         matchData.value = newData;
     }
 };

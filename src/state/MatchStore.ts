@@ -1,5 +1,6 @@
 import { signal, computed } from '@preact/signals';
 import type { CricMatch, NetworkStatus } from '../types';
+import { QueryClient } from '@tanstack/react-query';
 
 // Global state for Cric-Live
 export const matchData = signal<CricMatch | null>(null);
@@ -8,6 +9,21 @@ export const selectedMatchId = signal<string | null>(null);
 export const networkStatus = signal<NetworkStatus>('online');
 export const eventTrigger = signal<{ type: string; timestamp: number } | null>(null);
 export const apiStatus = signal<{ keyMissing: boolean; provider: string }>({ keyMissing: false, provider: 'cricketdata' });
+
+// Refresh Interval (in milliseconds)
+export const refreshInterval = signal<number>(
+    Number(localStorage.getItem('cric-live-refresh-interval')) || 60000
+);
+
+export const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: true,
+            retry: 1,
+            staleTime: 10000, // 10s base cache
+        },
+    },
+});
 
 // Favorites & Sorting
 export const favoriteTeams = signal<string[]>(
